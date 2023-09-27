@@ -8,16 +8,28 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageButton
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.freecodecampmemoryapp.models.BoardSize
+import com.example.freecodecampmemoryapp.models.MemoryCard
 import kotlin.math.min
 
-class MemoryBoardAdaptor(private val context: Context, private val boardSize: BoardSize) :
+class MemoryBoardAdaptor(
+    private val context: Context,
+    private val boardSize: BoardSize,
+    private val cards: List<MemoryCard>,
+    private val cardClickListener: CardClickListener
+) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object{
         private const val MARGIN_SIZE=10
         private const val TAG ="MemoryBoardAdaptor"
+    }
+
+    interface CardClickListener{
+        fun onCardClick(position: Int)
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
@@ -42,10 +54,18 @@ class MemoryBoardAdaptor(private val context: Context, private val boardSize: Bo
 
         private val imageButton=itemView.findViewById<ImageButton>(R.id.imageButton)
         fun bind(position:Int){
-            imageButton.setOnClickListener{
-                Log.i(TAG,"Click on $position")
-            }
+            val memoryCard =cards[position]
+            imageButton.setImageResource(if(memoryCard.isFaceUp) cards[position].identifier else R.drawable.ic_launcher_background )
 
+            imageButton.alpha=if(memoryCard.isMatched).4f else 1.0f
+            val colorStateList = if(memoryCard.isMatched) ContextCompat.getColorStateList(context,R.color.color_gray)else null
+
+            ViewCompat.setBackgroundTintList(imageButton,colorStateList)
+
+            imageButton.setOnClickListener{
+                Log.i(TAG,"Click on position $position")
+                cardClickListener.onCardClick(position)
+            }
 
         }
     }
